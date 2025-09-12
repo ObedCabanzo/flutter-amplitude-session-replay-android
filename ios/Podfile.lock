@@ -1,0 +1,75 @@
+PODS:
+  - amplitude_flutter (0.0.1):
+    - AmplitudeSwift (~> 1.14)
+    - Flutter
+    - FlutterMacOS
+  - AmplitudeCore (1.2.2)
+  - AmplitudeSessionReplay (0.7.0):
+    - AmplitudeCore (< 2.0.0, >= 1.1.0)
+  - AmplitudeSwift (1.14.0):
+    - AmplitudeCore (< 2.0.0, >= 1.1.0)
+    - AnalyticsConnector (~> 1.3.0)
+  - AnalyticsConnector (1.3.1)
+  - braze_plugin (14.0.3):
+    - BrazeKit (~> 12.0.0)
+    - BrazeLocation (~> 12.0.0)
+    - BrazeUI (~> 12.0.0)
+    - Flutter
+  - BrazeKit (12.0.3)
+  - BrazeLocation (12.0.3):
+    - BrazeKit (= 12.0.3)
+  - BrazeUI (12.0.3):
+    - BrazeKit (= 12.0.3)
+  - Flutter (1.0.0)
+  - permission_handler_apple (9.3.0):
+    - Flutter
+
+DEPENDENCIES:
+  - amplitude_flutter (from `.symlinks/plugins/amplitude_flutter/darwin`)
+  - AmplitudeSessionReplay (from `https://github.com/amplitude/AmplitudeSessionReplay-iOS.git`)
+  - braze_plugin (from `.symlinks/plugins/braze_plugin/ios`)
+  - Flutter (from `Flutter`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - AmplitudeCore
+    - AmplitudeSwift
+    - AnalyticsConnector
+    - BrazeKit
+    - BrazeLocation
+    - BrazeUI
+
+EXTERNAL SOURCES:
+  amplitude_flutter:
+    :path: ".symlinks/plugins/amplitude_flutter/darwin"
+  AmplitudeSessionReplay:
+    :git: https://github.com/amplitude/AmplitudeSessionReplay-iOS.git
+  braze_plugin:
+    :path: ".symlinks/plugins/braze_plugin/ios"
+  Flutter:
+    :path: Flutter
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+
+CHECKOUT OPTIONS:
+  AmplitudeSessionReplay:
+    :commit: 562da50ab68a12715d46cdac8324f7d800ce399c
+    :git: https://github.com/amplitude/AmplitudeSessionReplay-iOS.git
+
+SPEC CHECKSUMS:
+  amplitude_flutter: 4eb26cea5f147c917075bc8cb57449de518159a5
+  AmplitudeCore: 2cb120efbf0e96129d1a6972265ea479ee334565
+  AmplitudeSessionReplay: 490be88cae45d923a62da091f376b99c30145b2a
+  AmplitudeSwift: e96d3001ae5d20b596b9755e69840b5c75ea3adc
+  AnalyticsConnector: 3def11199b4ddcad7202c778bde982ec5da0ebb3
+  braze_plugin: 640c61545c7a97523647653fab5c4784802c7db8
+  BrazeKit: 44fab385edca94faaf96d7ce9f020b9c2ad3505e
+  BrazeLocation: 44d76d8bd8b71e9b35b80014d968bf28c6e60aac
+  BrazeUI: 8d107fe48a924d4e34bb8590a465082a822c20f7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+
+PODFILE CHECKSUM: a8e6548f2dc59bef67661f78c61071d20422d376
+
+COCOAPODS: 1.16.2
