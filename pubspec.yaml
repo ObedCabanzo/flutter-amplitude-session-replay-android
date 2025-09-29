@@ -37,6 +37,9 @@ dependencies:
   amplitude_flutter: ^4.3.7
   braze_plugin: ^14.0.3
   permission_handler: ^11.0.0
+  experiment_sdk_flutter:
+    git:
+      url: https://github.com/productminds/experiment_sdk_flutter.git  
 
 dev_dependencies:
   flutter_test:

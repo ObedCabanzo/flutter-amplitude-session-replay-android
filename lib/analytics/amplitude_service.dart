@@ -1,17 +1,43 @@
 // lib/analytics/amplitude_service.dart
 import 'dart:math';
 import 'package:amplitude_flutter/constants.dart';
+import 'package:experiment_sdk_flutter/experiment_client.dart';
+import 'package:experiment_sdk_flutter/experiment_sdk_flutter.dart';
+import 'package:experiment_sdk_flutter/types/experiment_config.dart';
+import 'package:experiment_sdk_flutter/types/experiment_variant.dart';
 import 'package:flutter/services.dart';
 import 'package:amplitude_flutter/amplitude.dart';
 import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 
+/// A singleton service for integrating Amplitude Analytics, Experiment, and Session Replay in Flutter.
+///
+/// This service handles initialization, event tracking, user/device/session management,
+/// and native communication for Amplitude's Session Replay feature.
+///
+/// Usage:
+///   - Call [init] once at app startup with the required API keys.
+///   - Use [track] to log events, which will automatically include Session Replay properties if available.
+///   - Use [getVariant] to fetch experiment variants for feature flags.
+///   - Use [setUserId] and [setDeviceId] to update user and device identifiers.
+///
+/// Features:
+///   - Ensures Amplitude Analytics and Session Replay are initialized only once.
+///   - Handles fallback device ID generation if needed.
+///   - Bootstraps session IDs for Session Replay if not immediately available.
+///   - Synchronizes session and device IDs with the native Session Replay plugin.
+///   - Provides safe error handling to avoid blocking the app on native errors.
+///
+/// Note:
+///   - The native plugin for Session Replay must be implemented to handle the required method channels.
+///   - Do not call [init] multiple times; use the singleton instance [AmplitudeService.instance].
 class AmplitudeService {
   AmplitudeService._();
   static final AmplitudeService instance = AmplitudeService._();
 
   late final Amplitude _client;
+  late final ExperimentClient _clientExp;
   bool _analyticsReady = false;
   bool _srReady = false;
 
@@ -23,9 +49,12 @@ class AmplitudeService {
   Future<void> init({
     required String apiKeyAnalytics,
     required String apiKeySessionReplay,
+    String apiKeyExperiment = '',
     bool eu = false,
     double sampleRate = 1.0,
     bool enableRemoteConfig = false,
+    bool experiment = false,
+    
   }) async {
     if (_analyticsReady) return;
 
@@ -44,6 +73,23 @@ class AmplitudeService {
       ),
     );
 
+    /// Initializes the Experiment client with Amplitude if the [experiment] flag is true and [apiKeyExperiment] is not empty.
+    /// 
+    /// The client is configured with automatic exposure tracking enabled and uses "main" as the instance name. The instanceName could be ignored if not using amplitude analytics. And it could be initialized with the function initialize instead of initializeWithAmplitude if not using amplitude analytics.
+    /// 
+    /// - [experiment]: A boolean flag indicating whether to initialize the Experiment client.
+    /// - [apiKeyExperiment]: The API key used for initializing the Experiment client.
+    /// - [_clientExp]: The Experiment client instance initialized with the provided API key and configuration.
+    if (experiment && apiKeyExperiment.isNotEmpty) {
+      _clientExp = Experiment.initializeWithAmplitude(
+        apiKey: apiKeyExperiment,
+        config: ExperimentConfig(automaticExposureTracking: true, instanceName: "main"),
+      );
+
+    }
+
+
+
     await _client.isBuilt;
     _analyticsReady = true;
 
@@ -55,6 +101,17 @@ class AmplitudeService {
       enableRemoteConfig: enableRemoteConfig,
 
     );
+  }
+
+  // Create functions for get a variant given a flag key and an optional userId 
+  Future<ExperimentVariant?> getVariant(String flagKey) async {
+    if (!_analyticsReady ) {
+      throw StateError('AmplitudeService no inicializado. Llama a init() primero.');
+    }
+    var deviceId = await _client.getDeviceId();
+    await _clientExp.fetch(deviceId: deviceId);
+    return _clientExp.variant(flagKey);
+  
   }
 
   void _ensureAnalyticsReady() {

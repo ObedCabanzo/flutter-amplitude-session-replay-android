@@ -24,7 +24,6 @@ final class SessionReplayHolder {
 
     sr = SessionReplay(
       apiKey: apiKey,
-      logger: ,
       deviceId: deviceId,
       sessionId: sessionId,      // epoch ms
       sampleRate: sampleRate,    // Float
