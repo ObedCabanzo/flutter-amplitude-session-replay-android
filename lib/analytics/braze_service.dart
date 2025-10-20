@@ -40,6 +40,10 @@ class BrazeService {
 
   void logEvent(String eventName, {Map<String, dynamic>? properties}) {
     _ensureInitialized();
+    _client.inAppMessageStreamController.stream.listen((message) {
+      
+    });
+    
     return _client.logCustomEvent(eventName, properties: properties);
   }
 

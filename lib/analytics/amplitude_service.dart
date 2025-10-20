@@ -1,4 +1,3 @@
-// lib/analytics/amplitude_service.dart
 import 'dart:math';
 import 'package:amplitude_flutter/constants.dart';
 import 'package:experiment_sdk_flutter/experiment_client.dart';
@@ -54,7 +53,6 @@ class AmplitudeService {
     double sampleRate = 1.0,
     bool enableRemoteConfig = false,
     bool experiment = false,
-    
   }) async {
     if (_analyticsReady) return;
 
@@ -72,23 +70,22 @@ class AmplitudeService {
         // serverZone: eu ? ServerZone.eu : ServerZone.us,
       ),
     );
-
+    
     /// Initializes the Experiment client with Amplitude if the [experiment] flag is true and [apiKeyExperiment] is not empty.
-    /// 
+    ///
     /// The client is configured with automatic exposure tracking enabled and uses "main" as the instance name. The instanceName could be ignored if not using amplitude analytics. And it could be initialized with the function initialize instead of initializeWithAmplitude if not using amplitude analytics.
-    /// 
+    ///
     /// - [experiment]: A boolean flag indicating whether to initialize the Experiment client.
     /// - [apiKeyExperiment]: The API key used for initializing the Experiment client.
     /// - [_clientExp]: The Experiment client instance initialized with the provided API key and configuration.
     if (experiment && apiKeyExperiment.isNotEmpty) {
       _clientExp = Experiment.initializeWithAmplitude(
         apiKey: apiKeyExperiment,
-        config: ExperimentConfig(automaticExposureTracking: true, instanceName: "main"),
+        config: ExperimentConfig(
+          automaticExposureTracking: true,
+        ),
       );
-
     }
-
-
 
     await _client.isBuilt;
     _analyticsReady = true;
@@ -99,31 +96,34 @@ class AmplitudeService {
       eu: eu,
       sampleRate: sampleRate,
       enableRemoteConfig: enableRemoteConfig,
-
     );
   }
 
-  // Create functions for get a variant given a flag key and an optional userId 
+  // Create functions for get a variant given a flag key and an optional userId
   Future<ExperimentVariant?> getVariant(String flagKey) async {
-    if (!_analyticsReady ) {
-      throw StateError('AmplitudeService no inicializado. Llama a init() primero.');
+    if (!_analyticsReady) {
+      throw StateError(
+        'AmplitudeService no inicializado. Llama a init() primero.',
+      );
     }
     var deviceId = await _client.getDeviceId();
     await _clientExp.fetch(deviceId: deviceId);
     return _clientExp.variant(flagKey);
-  
   }
 
   void _ensureAnalyticsReady() {
     if (!_analyticsReady) {
-      throw StateError('AmplitudeService no inicializado. Llama a init() primero.');
+      throw StateError(
+        'AmplitudeService no inicializado. Llama a init() primero.',
+      );
     }
   }
 
   // Genera un deviceId válido (>=5 chars) si aún no existe
   String _generateFallbackDeviceId() {
     final r = Random();
-    final hex = List.generate(16, (_) => r.nextInt(16).toRadixString(16)).join();
+    final hex =
+        List.generate(16, (_) => r.nextInt(16).toRadixString(16)).join();
     return 'flutter-$hex';
   }
 
@@ -199,7 +199,8 @@ class AmplitudeService {
     // Si SR aún no está listo, intenta inicializarlo ahora (no bloqueante si faltan IDs).
     if (!_srReady) {
       await _maybeInitSessionReplay(
-        apiKeySessionReplay: '', // no re-envíes la key aquí; pásala en init() inicial
+        apiKeySessionReplay:
+            '', // no re-envíes la key aquí; pásala en init() inicial
         eu: false,
         sampleRate: 1.0,
         enableRemoteConfig: true,
@@ -248,5 +249,21 @@ class AmplitudeService {
         await _sr.invokeMethod('updateIds', {'deviceId': deviceId});
       } catch (_) {}
     }
+  }
+
+  Future<String?> getDeviceId() async {
+    _ensureAnalyticsReady();
+    return _client.getDeviceId();
+  }
+
+  Future<int?> getSessionId() async {
+    _ensureAnalyticsReady();
+    return _client.getSessionId();
+  }
+
+  // Get User ID
+  Future<String?> getUserId() async {
+    _ensureAnalyticsReady();
+    return _client.getUserId();
   }
 }

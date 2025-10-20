@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/analytics/amplitude_analytics_service.dart';
+import 'package:flutter_application_3/analytics/amplitude_expeximent_service.dart';
 import 'package:flutter_application_3/analytics/amplitude_service.dart';
 import 'package:flutter_application_3/analytics/braze_service.dart';
+import 'package:flutter_application_3/models/feature_flags.dart';
 
 const Color kAppBarColor = Color(0xFF4A306D); // morado
 const Color kBottomBarColor = Color(0xFFA167A5); // rosado
@@ -10,12 +13,13 @@ const Color kOnBottomBarUnselected = Colors.white70;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AmplitudeService.instance.init(
+  await AmplitudeAnalyticsService.instance.init(
     apiKeyAnalytics: 'f09c448ff67b9a0c818000c42a91b49a',
-    apiKeySessionReplay: 'f09c448ff67b9a0c818000c42a91b49a',
     enableRemoteConfig: false,
-    experiment: true,
-    apiKeyExperiment: "f09c448ff67b9a0c818000c42a91b49a",
+  );
+
+  await AmplitudeExperimentService.instance.init(
+    apiKeyExperiment: 'client-cSW0bO9VJmZmRSjFExkGx1LtqncfZ8Uo',
   );
 
   await BrazeService.instance.init();
@@ -98,24 +102,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int counter = 0;
-  String? variantValue = "";
+  BannerHomeVariant? variantValue = BannerHomeVariant.off;
+  String? message = "This is a banner";
+  String? color = "red";
 
   @override
   void initState() {
     super.initState();
-    AmplitudeService.instance.track("home_page_viewed");
+    AmplitudeAnalyticsService.instance.track("home_page_viewed");
     BrazeService.instance.logEvent("home_page_viewed");
 
-    AmplitudeService.instance.getVariant("home-testing").then((onValue) {
+    AmplitudeExperimentService.instance.getVariant(bannerHomeFlag).then((
+      onValue,
+    ) {
       setState(() {
-        variantValue = onValue?.value; // esperado: "top" o "bottom"
+        variantValue = onValue.variant; // esperado: "top" o "bottom"
+        message = onValue.payload.message;
+        color = onValue.payload.color;
       });
-      print("Variant for 'home-testing': $variantValue");
+      print(onValue.variant);
+      print("Payload message: ${onValue.payload.message}");
+      print("Payload color: ${onValue.payload.color}");
     });
   }
-
-   // default: top, if is ios move to top, if is android move to bottom
-  bool get _isTop => variantValue == "ios" || variantValue == "";
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     counter++;
                   });
-                  AmplitudeService.instance.track("count_updated");
+                  AmplitudeAnalyticsService.instance.track("count_updated");
                 },
                 child: const Text('Increment Counter (solo Home)'),
               ),
@@ -150,17 +159,23 @@ class _HomeScreenState extends State<HomeScreen> {
         Positioned(
           left: 0,
           right: 0,
-          top: _isTop ? 0 : null,
-          bottom: _isTop ? null : 0,
+          top:
+              variantValue == BannerHomeVariant.abajo
+                  ? null
+                  : variantValue == BannerHomeVariant.medio
+                  ? 50
+                  : 0,
+          bottom: variantValue == BannerHomeVariant.abajo
+              ? 0
+              : null,
+
           child: SafeArea(
-            top: _isTop,
-            bottom: !_isTop,
             child: Container(
               color: Colors.red,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  "This is a banner",
+                  message ?? 'This is a banner',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -205,7 +220,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    AmplitudeService.instance.track("search_page_viewed");
+    AmplitudeAnalyticsService.instance.track("search_page_viewed");
     BrazeService.instance.logEvent("search_page_viewed");
   }
 
@@ -229,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    AmplitudeService.instance.track("settings_page_viewed");
+    AmplitudeAnalyticsService.instance.track("settings_page_viewed");
     BrazeService.instance.logEvent("settings_page_viewed");
   }
 
@@ -258,8 +273,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {
-                    AmplitudeService.instance.setUserId(userId);
+                    AmplitudeAnalyticsService.instance.setUserId(userId);
                     BrazeService.instance.setUserId(userId);
+                    AmplitudeExperimentService.instance.refresh();
                   },
                   child: const Text('Set User ID'),
                 ),
