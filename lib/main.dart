@@ -20,6 +20,7 @@ Future<void> main() async {
 
   await AmplitudeExperimentService.instance.init(
     apiKeyExperiment: 'client-cSW0bO9VJmZmRSjFExkGx1LtqncfZ8Uo',
+    automaticExposureTracking: true,
   );
 
   await BrazeService.instance.init();

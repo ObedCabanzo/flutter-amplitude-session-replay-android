@@ -89,8 +89,8 @@ class AmplitudeExperimentService {
     if (fetch) {
       await _client!.fetch(deviceId: deviceId, userId: userId);
     }
-
-    final ExperimentVariant? raw = _client!.variant(def.key);
+    
+    final ExperimentVariant? raw = _client!.variant(def.key); 
     print("Raw variant for '${def.key}': $raw");
     final V variantEnum = def.mapToEnum(raw?.value);
     P payloadParsed;

@@ -75,7 +75,7 @@ class BannerHomePayload {
 
 final FlagDefinition<BannerHomeVariant, BannerHomePayload> bannerHomeFlag =
     FlagDefinition<BannerHomeVariant, BannerHomePayload>(
-  key: 'banner_home',
+  key: 'banner-home',
   variants: const {
     'off': BannerHomeVariant.off,
     'abajo': BannerHomeVariant.abajo,
